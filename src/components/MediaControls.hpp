@@ -54,6 +54,7 @@ private slots:
 	void SetPlayingState();
 	void SetPausedState();
 	void SetRestartState();
+	void ResetMonitoring();
 	void RestartMedia();
 	void StopMedia();
 	void PlaylistNext();

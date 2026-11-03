@@ -321,6 +321,11 @@ void Soundboard::play(MediaObj *obj)
 {
 	QString path = obj->getPath();
 
+	// Reset monitoring immediately before launching each sound. Do not do
+	// this from media_ended: OBS can emit that signal while seeking, which
+	// would interrupt timeline controls.
+	ui->mediaControls->ResetMonitoring();
+
 	if (prevPath == path) {
 		obs_source_media_restart(source);
 		return;
