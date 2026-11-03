@@ -15,6 +15,13 @@ void MediaControls::OBSMediaStopped(void *data, calldata_t *)
 	QMetaObject::invokeMethod(media, "SetRestartState");
 }
 
+void MediaControls::OBSMediaEnded(void *data, calldata_t *)
+{
+	MediaControls *media = static_cast<MediaControls *>(data);
+	QMetaObject::invokeMethod(media, "SetRestartState");
+	QMetaObject::invokeMethod(media, "ResetMonitoring");
+}
+
 void MediaControls::OBSMediaPlay(void *data, calldata_t *)
 {
 	MediaControls *media = static_cast<MediaControls *>(data);
@@ -311,7 +318,7 @@ void MediaControls::SetSource(OBSSource source)
 		sigs.emplace_back(sh, "media_restart", OBSMediaPlay, this);
 		sigs.emplace_back(sh, "media_stopped", OBSMediaStopped, this);
 		sigs.emplace_back(sh, "media_started", OBSMediaStarted, this);
-		sigs.emplace_back(sh, "media_ended", OBSMediaStopped, this);
+		sigs.emplace_back(sh, "media_ended", OBSMediaEnded, this);
 		sigs.emplace_back(sh, "media_next", OBSMediaNext, this);
 		sigs.emplace_back(sh, "media_previous", OBSMediaPrevious, this);
 	} else {
@@ -375,6 +382,28 @@ void MediaControls::on_playPauseButton_clicked()
 	default:
 		break;
 	}
+}
+
+void MediaControls::ResetMonitoring()
+{
+	OBSSource source = OBSGetStrongRef(weakSource);
+	if (!source)
+		return;
+
+	const obs_monitoring_type previousType = obs_source_get_monitoring_type(source);
+	if (previousType == OBS_MONITORING_TYPE_NONE)
+		return;
+
+	// Reset the monitoring edge after every completed sound. This works
+	// around OBS retaining a stale monitor state for the hidden media source.
+	obs_source_set_monitoring_type(source, OBS_MONITORING_TYPE_NONE);
+
+	// Restore the previous mode after OBS has processed the OFF transition.
+	QTimer::singleShot(0, this, [this, previousType]() {
+		OBSSource source = OBSGetStrongRef(weakSource);
+		if (source)
+			obs_source_set_monitoring_type(source, previousType);
+	});
 }
 
 void MediaControls::RestartMedia()
