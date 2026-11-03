@@ -31,7 +31,6 @@ private:
 	int64_t GetSliderTime(int val);
 
 	static void OBSMediaStopped(void *data, calldata_t *calldata);
-	static void OBSMediaEnded(void *data, calldata_t *calldata);
 	static void OBSMediaPlay(void *data, calldata_t *calldata);
 	static void OBSMediaPause(void *data, calldata_t *calldata);
 	static void OBSMediaStarted(void *data, calldata_t *calldata);

@@ -15,13 +15,6 @@ void MediaControls::OBSMediaStopped(void *data, calldata_t *)
 	QMetaObject::invokeMethod(media, "SetRestartState");
 }
 
-void MediaControls::OBSMediaEnded(void *data, calldata_t *)
-{
-	MediaControls *media = static_cast<MediaControls *>(data);
-	QMetaObject::invokeMethod(media, "SetRestartState");
-	QMetaObject::invokeMethod(media, "ResetMonitoring");
-}
-
 void MediaControls::OBSMediaPlay(void *data, calldata_t *)
 {
 	MediaControls *media = static_cast<MediaControls *>(data);
@@ -318,7 +311,7 @@ void MediaControls::SetSource(OBSSource source)
 		sigs.emplace_back(sh, "media_restart", OBSMediaPlay, this);
 		sigs.emplace_back(sh, "media_stopped", OBSMediaStopped, this);
 		sigs.emplace_back(sh, "media_started", OBSMediaStarted, this);
-		sigs.emplace_back(sh, "media_ended", OBSMediaEnded, this);
+		sigs.emplace_back(sh, "media_ended", OBSMediaStopped, this);
 		sigs.emplace_back(sh, "media_next", OBSMediaNext, this);
 		sigs.emplace_back(sh, "media_previous", OBSMediaPrevious, this);
 	} else {
